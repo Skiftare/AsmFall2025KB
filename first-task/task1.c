@@ -111,23 +111,23 @@ int num_to_str(long n, char *buf) {
     return j;
 }
 
-long evaluate(char **expr_ptr, bool *error_flag) {
+long evaluate(char **p, bool *error_flag) {
     if (*error_flag) {
         return 0;
     }
     long token_value;
-    int token_type = get_token(expr_ptr, &token_value);
+    int token_type = get_token(p, &token_value);
 
     switch (token_type) {
         case number:
             return token_value;
 
         case operator: {
-            long op1 = evaluate(expr_ptr, error_flag);
+            long op1 = evaluate(p, error_flag);
             if (*error_flag) {
                 return op1;
             }
-            long op2 = evaluate(expr_ptr, error_flag);
+            long op2 = evaluate(p, error_flag);
             if (*error_flag) {
                 return op2;
             }
