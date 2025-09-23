@@ -1,4 +1,4 @@
-name: Task one
+name: task1
 
 on:
   push:

@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <syscall.h>
+#include <stdbool.h>
 
 #define BUFFER_SIZE 10*1024
 #define NUM_STR_SIZE 21
