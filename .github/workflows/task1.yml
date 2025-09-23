@@ -1,0 +1,28 @@
+name: Task one
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check
+        uses: actions/checkout@v4
+
+      - name: Init
+        run: sudo apt-get update && sudo apt-get install -y gcc
+
+      - name: Build
+        run: gcc first-task/task1.c -o first-task/task1
+
+      - name: Tests
+        run: |
+          cd first-task/data
+          for input in test*[!_expected]; do
+            expected="${input}_expected"
+            echo ">>> Running test: $input"
+            ../task1 "$input" > output.txt
+            diff -u "$expected" output.txt
+          done
