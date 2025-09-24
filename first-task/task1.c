@@ -10,7 +10,7 @@
 
 #define BUFFER_SIZE (10*1024)
 #define NUM_STR_SIZE 21
-int g_stdout_desc = 0;
+const short stdout_desc = 1;
 /*
 Интерфейс программы - 1 аргумент, это название файлика с вычислениями
 
@@ -25,7 +25,7 @@ pid_t write_in_file(int file_desc, const void *buf, int count) {
 }
 
 pid_t prt(const void *buf, int count) {
-    return write_in_file(g_stdout_desc, buf, count);
+    return write_in_file(stdout_desc, buf, count);
 }
 
 
@@ -156,13 +156,6 @@ long evaluate(char **p, bool *error_flag) {
 }
 
 int main(int argc, char *argv[]) {
-    int stdout_desc = syscall(SYS_open, "/dev/stdout", O_WRONLY);
-    if (stdout_desc == -1) {
-        //Печатать не умеем. Просто умираем
-        syscall(SYS_exit, 42);
-    }
-    g_stdout_desc = stdout_desc;
-
     if (argc != 2) {
         prt("./a file", 8);
         prt("\n", 1);

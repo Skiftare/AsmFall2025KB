@@ -3,5 +3,5 @@ project(AsmFall2025KB)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(AsmFall2025KB main.cpp
+add_executable(AsmFall2025KB
         first-task/task1.c)
