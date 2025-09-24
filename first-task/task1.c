@@ -8,7 +8,7 @@
 #include <syscall.h>
 #include <stdbool.h>
 
-#define BUFFER_SIZE 10*1024
+#define BUFFER_SIZE (10*1024)
 #define NUM_STR_SIZE 21
 int g_stdout_desc = 0;
 /*
@@ -25,7 +25,7 @@ pid_t write_in_file(int file_desc, const void *buf, int count) {
 }
 
 pid_t prt(const void *buf, int count) {
-    return syscall(SYS_write, g_stdout_desc, buf, count);
+    return write_in_file(g_stdout_desc, buf, count);
 }
 
 
@@ -220,7 +220,5 @@ int main(int argc, char *argv[]) {
             p++;
         }
     }
-
-
     exit_with_syscall(0);
 }
