@@ -3,7 +3,7 @@
 
 | Задание | Статус       | Примечание                     |
 |---------|--------------|--------------------------------|
-| Task 1  | ? Сделано    | [![Build Status](https://github.com/Skiftare/AsmFall2025KB/actions/workflows/task1.yml/badge.svg?branch=master)](https://github.com/Skiftare/AsmFall2025KB/actions/workflows/task1.yml) |
+| Task 1  | [x] Сдано    | [![Build Status](https://github.com/Skiftare/AsmFall2025KB/actions/workflows/task1.yml/badge.svg?branch=master)](https://github.com/Skiftare/AsmFall2025KB/actions/workflows/task1.yml) |
 | Task 2  | - Не начато |                                |
 | Task 3  | - Не начато |                                |
 | Task 4  | - Не начато |                                |
