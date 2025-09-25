@@ -7,6 +7,9 @@
 #include <fcntl.h>
 #include <syscall.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+
 
 #define BUFFER_SIZE (10*1024)
 #define NUM_STR_SIZE 21
@@ -20,11 +23,20 @@ const short stdout_desc = 1;
  */
 
 //Я хз что мы будем передавать в buf, но мы это будем писать в файл.
-pid_t write_in_file(int file_desc, const void *buf, int count) {
+
+/*
+ * SYNOPSIS         top
+       #include <sys/syscall.h>      * Definition of SYS_* constants *
+       #include <unistd.h>
+
+       long syscall(long number, ...);
+       Выдержка из man, я уверен что где-то я видел ssize_t, то я и так сижу в виме в виртуалке, пускай будет long
+       */
+long write_in_file(int file_desc, const void *buf, int count) {
     return syscall(SYS_write, file_desc, buf, count);
 }
 
-pid_t prt(const void *buf, int count) {
+long  prt(const void *buf, int count) {
     return write_in_file(stdout_desc, buf, count);
 }
 
@@ -157,32 +169,73 @@ long evaluate(char **p, bool *error_flag) {
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        prt("./a file", 8);
+        prt("./main file", 8+3);
         prt("\n", 1);
         exit_with_syscall(2);
     }
 
     const char *filaname = argv[1]; //Не поменяем
-    int file_desc = syscall(SYS_open, filaname, O_RDONLY); //логично что RDonly
+    long file_desc = syscall(SYS_open, filaname, O_RDONLY); //логично что RDonly
     if (file_desc == -1) {
         prt("err open", 8);
         prt("\n", 1);
         exit_with_syscall(3);
     }
     char buffer[BUFFER_SIZE];
-    long int bytes_read = syscall(SYS_read, file_desc, buffer, sizeof(buffer) - 1);
+    //long bytes_read = syscall(SYS_read, file_desc, buffer, sizeof(buffer) - 1);
+    /*
+     *
+     * Ну раз решили писать нормально, то мы можем прикрутить обработку на размер файла, потом маппить его в память
+     * С помощью нейронки я узнал о fstat, в целом почему бы и нет
+     *
+     *On success, zero is returned. On error, -1 is returned, and errno is set to indicate the error.
+     * */
+    struct stat st;
+    long fstat_val = syscall(SYS_fstat, file_desc, &st);
+    if(fstat_val == -1){
+	prt("fstat err\n",10);
+	exit_with_syscall(4);
+    }
+    long real_file_size = st.st_size;
+    if(real_file_size > BUFFER_SIZE-1){
+	prt("wrong size of file\n", 19);
+	syscall(SYS_close, file_desc);
+	exit_with_syscall(5);
+    }
+    //	https://manpages.debian.org/unstable/manpages-dev/mmap.2.en.html
+
+    void *mapped = (void *)syscall(SYS_mmap,
+        0,                   
+        real_file_size,           
+        PROT_READ,           
+        MAP_PRIVATE,         
+	file_desc,
+        0     
+    );
+    /*
+     * RETURN VALUE
+On success, mmap() returns a pointer to the mapped area. On error, the value MAP_FAILED (that is, (void *) -1) is returned, and errno is set to indicate the error.
+
+On success, munmap() returns 0. On failure, it returns -1, and errno is set to indicate the error (probably to EINVAL).
+*/
+    if (mapped == MAP_FAILED) {
+        prt("mmap failed\n", 12);
+        syscall(SYS_close, file_desc);
+        exit_with_syscall(6);
+    }
+    
+    for (long i = 0; i < real_file_size; i++) {
+        buffer[i] = ((char *)mapped)[i];
+    }
+    buffer[real_file_size] = '\0'; 
+    //Размаппливаем всё обратно, т.к. данные уже в буфере.
+    syscall(SYS_munmap, mapped,real_file_size); 
     syscall(SYS_close, file_desc);
 
-    if (bytes_read < 0) {
-        prt("err read", 8);
-        prt("\n", 1);
-        exit_with_syscall(4);
-    }
-    buffer[bytes_read] = '\0'; // У нас всё с запасом, переполнения не будет и флаг поставили.
-
+   
     char *p = buffer;
     bool flag = false;
-    while ((p - buffer) < bytes_read) {
+    while ((p - buffer) < real_file_size) {
         long result = evaluate(&p, &flag);
         if (flag) {
             if (result == -1) {
