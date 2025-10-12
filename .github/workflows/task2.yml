@@ -31,7 +31,7 @@ jobs:
 
       - name: Run and check exit code is 31
         run: |
-          cd second_task
+          cd second-task
           ./primeNth
           exit_code=$?
           echo "Exit code: $exit_code"
