@@ -31,13 +31,14 @@ jobs:
 
       - name: Run and check exit code is 31
         run: |
-          cd second-task
+          cd second_task
           ./primeNth
           exit_code=$?
           echo "Exit code: $exit_code"
-          if [ $exit_code -ne 31 ]; then
+          if [ "$exit_code" -ne 31 ]; then
             echo "FAIL: expected exit code 31, got $exit_code"
             exit 1
           else
             echo "SUCCESS: exit code is 31"
           fi
+        shell: /usr/bin/bash {0}
