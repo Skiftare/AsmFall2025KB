@@ -21,8 +21,8 @@ _start:
     movq $0, %rdx
 
     divq %r11
-    testq %rdx, %rdx
-    jz .not_prime
+    cmpq $0, %rdx
+    je .not_prime
 
     incq %r11
     jmp .loop
