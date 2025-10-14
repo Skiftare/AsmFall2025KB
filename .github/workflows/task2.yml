@@ -1,0 +1,41 @@
+name: task2
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check
+        uses: actions/checkout@v4
+
+      - name: Check source contains 'movq $11, %r8'
+        run: |
+          if ! grep -q "movq \$11, %r8" second-task/primeNth.asm; then
+            echo "Error: expected 'movq \$11, %r8' in second-task/primeNth.asm"
+            exit 1
+          fi
+
+      - name: Assemble
+        run: |
+          cd second-task
+          as --64 primeNth.asm -o primeNth.o
+          ld primeNth.o -o primeNth
+
+      - name: Run and check exit code is 31
+        run: |
+          cd second-task
+          ./primeNth
+          exit_code=$?
+          echo "Exit code: $exit_code"
+          if [ "$exit_code" -ne 31 ]; then
+            echo "FAIL: expected exit code 31, got $exit_code"
+            exit 1
+          else
+            echo "SUCCESS: exit code is 31"
+          fi
+        shell: /usr/bin/bash {0}
