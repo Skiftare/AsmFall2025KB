@@ -19,7 +19,7 @@ _start:
     # r9 % r11 == 0?
     movq %r9, %rax
     movq $0, %rdx
-rr
+
     divq %r11
     cmpq $0, %rdx
     je .not_prime
